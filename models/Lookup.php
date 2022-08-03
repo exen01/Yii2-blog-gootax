@@ -92,11 +92,7 @@ class Lookup extends ActiveRecord
     private static function loadItems(string $type): void
     {
         self::$_items[$type] = array();
-        $models = self::findAll([
-            'condition' => 'type=:type',
-            'params' => array(':type' => $type),
-            'order' => 'position',
-        ]);
+        $models = self::findAll(['type' => $type,]);
         foreach ($models as $model)
             self::$_items[$type][$model->code] = $model->name;
     }

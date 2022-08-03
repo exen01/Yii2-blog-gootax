@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use phpDocumentor\Reflection\Types\This;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -112,8 +113,39 @@ class Post extends ActiveRecord
         $this->tags = Tag::array2string(array_unique(Tag::string2array($this->tags)));
     }
 
+
     public function getUrl(): string
     {
         return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->create_time = $this->update_time = time();
+                $this->author_id = Yii::$app->user->id;
+            } else {
+                $this->update_time = time();
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        Tag::updateFrequency($this->_oldTags, $this->tags);
+    }
+
+    private string $_oldTags = '';
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->_oldTags = $this->tags;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Lookup;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -18,7 +19,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tags')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList([Lookup::items('PostStatus')]) ?>
 
     <?= $form->field($model, 'create_time')->textInput() ?>
 
