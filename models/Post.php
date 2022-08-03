@@ -3,6 +3,9 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "{{%post}}".
@@ -19,12 +22,16 @@ use Yii;
  * @property User $author
  * @property Comment[] $comments
  */
-class Post extends \yii\db\ActiveRecord
+class Post extends ActiveRecord
 {
+    const STATUS_DRAFT = 1;
+    const STATUS_PUBLISHED = 2;
+    const STATUS_ARCHIVED = 3;
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%post}}';
     }
@@ -32,21 +39,23 @@ class Post extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['title', 'content', 'status', 'author_id'], 'required'],
-            [['content', 'tags'], 'string'],
-            [['status', 'create_time', 'update_time', 'author_id'], 'integer'],
-            [['title'], 'string', 'max' => 128],
-            [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
+            [['title', 'content', 'status'], 'required'],
+            ['title', 'string', 'max' => 128],
+            ['status', 'in', 'range' => array(1, 2, 3)],
+            ['tags', 'match', 'pattern' => '/^[\w\s,]+$/',
+                'message' => 'В тегах можно использовать только буквы.'],
+            ['tags', 'normalizeTags'],
+            [['title', 'status'], 'safe', 'on' => 'search'],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -63,20 +72,48 @@ class Post extends \yii\db\ActiveRecord
     /**
      * Gets query for [[Author]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getAuthor()
+    public function getAuthor(): ActiveQuery
     {
-        return $this->hasOne(User::className(), ['id' => 'author_id']);
+        return $this->hasOne('User', ['id' => 'author_id']);
     }
 
     /**
      * Gets query for [[Comments]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getComments()
+    public function getComments(): ActiveQuery
     {
-        return $this->hasMany(Comment::className(), ['post_id' => 'id']);
+        // TODO add order comments.create_time DESC
+        return $this->hasMany(Comment::class, ['post_id' => 'id'])->filterWhere(['status' => Comment::STATUS_APPROVED]);
+    }
+
+    /**
+     * Gets count of comments of post.
+     *
+     * @return bool|int|string|null count of comments.
+     */
+    public function getCommentsCount(): bool|int|string|null
+    {
+        return $this->getComments()->count();
+    }
+
+    /**
+     * Normalizes the tags introduced by the user.
+     *
+     * @param $attribute
+     * @param $params
+     * @return void
+     */
+    public function normalizeTags($attribute, $params): void
+    {
+        $this->tags = Tag::array2string(array_unique(Tag::string2array($this->tags)));
+    }
+
+    public function getUrl(): string
+    {
+        return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
     }
 }
