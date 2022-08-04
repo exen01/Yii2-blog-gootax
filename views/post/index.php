@@ -1,10 +1,7 @@
 <?php
 
-use app\models\Post;
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\ActionColumn;
-use yii\grid\GridView;
+use yii\widgets\ListView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -20,27 +17,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Post', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+    <?php   if (Yii::$app->request->get('tag')): ?>
+        <h1>Записи с тегом <i><?php echo Html::encode(Yii::$app->request->get('tag')); ?></i></h1>
+    <?php endif; ?>
 
-    <?= GridView::widget([
+    <?= ListView::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'title',
-            'content:ntext',
-            'tags:ntext',
-            'status',
-            //'create_time:datetime',
-            //'update_time:datetime',
-            //'author_id',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Post $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
-        ],
+        'itemView' => '_view',
     ]); ?>
 
 

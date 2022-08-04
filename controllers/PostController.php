@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Post;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
@@ -23,7 +24,7 @@ class PostController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -41,8 +42,8 @@ class PostController extends Controller
                         'roles' => ['@'],
                     ],
                     [
-                      'allow' => false,
-                      'roles' => ['?'],
+                        'allow' => false,
+                        'roles' => ['?'],
                     ],
                 ],
             ],
@@ -56,18 +57,24 @@ class PostController extends Controller
      */
     public function actionIndex(): string
     {
+        $query = Post::find()
+            ->where(['status' => Post::STATUS_PUBLISHED]);
+
+        if ($this->request->get('tag')) {
+            $query->andWhere(['like', 'tags', $this->request->get('tag')])->all();
+        }
+
         $dataProvider = new ActiveDataProvider([
-            'query' => Post::find(),
-            /*
+            'query' => $query,
             'pagination' => [
-                'pageSize' => 50
+                'pageSize' => 5
             ],
             'sort' => [
                 'defaultOrder' => [
                     'id' => SORT_DESC,
                 ]
             ],
-            */
+
         ]);
 
         return $this->render('index', [
@@ -153,7 +160,15 @@ class PostController extends Controller
      */
     protected function findModel(int $id): Post
     {
-        if (($model = Post::findOne(['id' => $id])) !== null) {
+        if (Yii::$app->user->isGuest) {
+            $model = Post::find()
+                ->where(['status' => [Post::STATUS_PUBLISHED, Post::STATUS_ARCHIVED], 'id' => $id])
+                ->one();
+        } else {
+            $model = Post::findOne(['id' => $id]);
+        }
+
+        if ($model !== null) {
             return $model;
         }
 

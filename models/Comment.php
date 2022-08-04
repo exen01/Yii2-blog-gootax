@@ -4,6 +4,8 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "{{%comment}}".
@@ -19,7 +21,7 @@ use yii\db\ActiveQuery;
  *
  * @property Post $post
  */
-class Comment extends \yii\db\ActiveRecord
+class Comment extends ActiveRecord
 {
     const STATUS_PENDING = 1;
     const STATUS_APPROVED = 2;
@@ -42,7 +44,7 @@ class Comment extends \yii\db\ActiveRecord
             [['content'], 'string'],
             [['status', 'create_time', 'post_id'], 'integer'],
             [['author', 'email', 'url'], 'string', 'max' => 128],
-            [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::className(), 'targetAttribute' => ['post_id' => 'id']],
+            [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
         ];
     }
 
@@ -70,6 +72,29 @@ class Comment extends \yii\db\ActiveRecord
      */
     public function getPost(): ActiveQuery
     {
-        return $this->hasOne(Post::className(), ['id' => 'post_id']);
+        return $this->hasOne(Post::class, ['id' => 'post_id']);
+    }
+
+    /**
+     * @param Post|null $post the post that this comment belongs to. If null, the method
+     * will query for the post.
+     * @return string the permalink URL for this comment
+     */
+    public function getUrl(Post $post = null): string
+    {
+        if ($post === null)
+            $post = $this->post;
+        return $post->getUrl() . '#c' . $this->id;
+    }
+
+    /**
+     * @return string the hyperlink display for the current comment's author
+     */
+    public function getAuthorLink(): string
+    {
+        if (!empty($this->url))
+            return Html::a(Html::encode($this->author), $this->url);
+        else
+            return Html::encode($this->author);
     }
 }

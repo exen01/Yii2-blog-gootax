@@ -1,7 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Post */
@@ -9,35 +8,33 @@ use yii\widgets\DetailView;
 $this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Posts', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
+YiiAsset::register($this);
 ?>
-<div class="post-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+<?= $this->render('_view', ['model' => $model]) ?>
 
-    <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
-    </p>
+<div id="comments">
+    <?php if ($model->getCommentsCount() >= 1): ?>
+        <h3>
+            <?= $model->getCommentsCount() > 1 ? $model->getCommentsCount() . ' comments' : 'One comment'; ?>
+        </h3>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'title',
-            'content:ntext',
-            'tags:ntext',
-            'status',
-            'create_time:datetime',
-            'update_time:datetime',
-            'author_id',
-        ],
-    ]) ?>
+        <?= $this->render('_comments', [
+            'post' => $model,
+            'comments' => $model->comments,
+        ]); ?>
+    <?php endif; ?>
+
+    <h3>Leave a Comment</h3>
+
+    <?php if (Yii::$app->session->hasFlash('commentSubmitted')): ?>
+        <div class="flash-success">
+            <?php echo Yii::$app->session->getFlash('commentSubmitted'); ?>
+        </div>
+    <?php else: ?>
+        <?= $this->render('/comment/_form', array(
+            'model' => new \app\models\Comment()
+        )); ?>
+    <?php endif; ?>
 
 </div>

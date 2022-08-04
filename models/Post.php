@@ -6,6 +6,7 @@ use phpDocumentor\Reflection\Types\This;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 /**
@@ -77,7 +78,7 @@ class Post extends ActiveRecord
      */
     public function getAuthor(): ActiveQuery
     {
-        return $this->hasOne('User', ['id' => 'author_id']);
+        return $this->hasOne(User::class, ['id' => 'author_id']);
     }
 
     /**
@@ -100,6 +101,20 @@ class Post extends ActiveRecord
     {
         return $this->getComments()->count();
     }
+
+    /**
+     * @return array a list of links that point to the post list filtered by every tag of this post.
+     */
+    public function getTagLinks(): array
+    {
+        $links = [];
+        foreach (Tag::string2array($this->tags) as $tag) {
+            $links[] = Html::a(Html::encode($tag), ['post/index', 'tag' => $tag]);
+        }
+
+        return $links;
+    }
+
 
     /**
      * Normalizes the tags introduced by the user.
