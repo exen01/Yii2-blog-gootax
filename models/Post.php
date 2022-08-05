@@ -115,7 +115,6 @@ class Post extends ActiveRecord
         return $links;
     }
 
-
     /**
      * Normalizes the tags introduced by the user.
      *
@@ -162,5 +161,12 @@ class Post extends ActiveRecord
     {
         parent::afterFind();
         $this->_oldTags = $this->tags;
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        Comment::deleteAll('post_id=' . $this->id);
+        Tag::updateFrequency($this->tags, '');
     }
 }

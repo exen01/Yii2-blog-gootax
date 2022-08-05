@@ -51,7 +51,7 @@ class PostController extends Controller
     }
 
     /**
-     * Lists all Post models.
+     * Lists published Post models.
      *
      * @return string
      */
@@ -92,6 +92,22 @@ class PostController extends Controller
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
+     * Lists all Post models.
+     *
+     * @return string
+     */
+    public function actionAdmin(): string
+    {
+        $dataProvider = new ActiveDataProvider([
+            'query' => Post::find(),
+        ]);
+
+        return $this->render('admin', [
+            'dataProvider' => $dataProvider,
         ]);
     }
 
