@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Comment;
 use app\models\Post;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -11,6 +12,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * PostController implements the CRUD actions for Post model.
@@ -90,8 +92,12 @@ class PostController extends Controller
      */
     public function actionView(int $id): string
     {
+        $post = $this->findModel($id);
+        $comment = $this->newComment($post);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $post,
+            'comment' => $comment,
         ]);
     }
 
@@ -189,6 +195,31 @@ class PostController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * Creates a new comment.
+     * This method attempts to create a new comment based on the user input.
+     * If the comment is successfully created, the browser will be redirected
+     * to show the created comment.
+     * @param Post $post the post that the new comment belongs to
+     * @return Comment the comment instance
+     */
+    protected function newComment(Post $post): Comment
+    {
+        $comment = new Comment();
+        if ($this->request->post('Comment')) {
+            $comment->load($this->request->post());
+            if ($post->addComment($comment)) {
+                if ($comment->status === Comment::STATUS_PENDING) {
+                    Yii::$app->session->setFlash('commentSubmitted', 'Thank you for your comment.
+                Your comment will be posted once it is approved.');
+                }
+                $this->refresh();
+            }
+        }
+
+        return $comment;
     }
 
 

@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\StaleObjectException;
 use yii\helpers\Html;
 
 /**
@@ -40,11 +41,13 @@ class Comment extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['content', 'status', 'author', 'email', 'post_id'], 'required'],
+            [['content', 'author', 'email'], 'required'],
             [['content'], 'string'],
-            [['status', 'create_time', 'post_id'], 'integer'],
             [['author', 'email', 'url'], 'string', 'max' => 128],
-            [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
+            [['status', 'create_time', 'post_id'], 'integer'],
+            //[['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
+            ['email', 'email'],
+            ['url', 'url'],
         ];
     }
 
@@ -55,13 +58,13 @@ class Comment extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'content' => 'Content',
+            'content' => 'Comment',
             'status' => 'Status',
             'create_time' => 'Create Time',
-            'author' => 'Author',
+            'author' => 'Name',
             'email' => 'Email',
-            'url' => 'Url',
-            'post_id' => 'Post ID',
+            'url' => 'Website',
+            'post_id' => 'Post',
         ];
     }
 
@@ -96,5 +99,32 @@ class Comment extends ActiveRecord
             return Html::a(Html::encode($this->author), $this->url);
         else
             return Html::encode($this->author);
+    }
+
+    /**
+     * This is invoked before the record is saved.
+     * @return boolean whether the record should be saved.
+     */
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->create_time = time();
+                $this->status = Comment::STATUS_PENDING;
+            }
+
+            return true;
+        } else
+            return false;
+    }
+
+    /**
+     * Approves a comment.
+     * @throws StaleObjectException
+     */
+    public function approve()
+    {
+        $this->status = Comment::STATUS_APPROVED;
+        $this->update();
     }
 }

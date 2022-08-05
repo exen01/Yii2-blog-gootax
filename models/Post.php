@@ -133,6 +133,28 @@ class Post extends ActiveRecord
         return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
     }
 
+    /**
+     * Adds a comment to the post.
+     *
+     * @param $comment Comment Added comment.
+     * @return bool
+     */
+    public function addComment(Comment $comment): bool
+    {
+        if (isset(Yii::$app->params['commentNeedApproval'])) {
+            $comment->status = Comment::STATUS_PENDING;
+        } else {
+            $comment->status = Comment::STATUS_APPROVED;
+        }
+
+        $comment->post_id = $this->id;
+        return $comment->save();
+    }
+
+    /**
+     * This is invoked before the record is saved.
+     * @return boolean whether the record should be saved.
+     */
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
@@ -149,6 +171,9 @@ class Post extends ActiveRecord
         }
     }
 
+    /**
+     * This is invoked after the record is saved.
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -157,12 +182,18 @@ class Post extends ActiveRecord
 
     private string $_oldTags = '';
 
+    /**
+     * This is invoked when a record is populated with data from a find() call.
+     */
     public function afterFind()
     {
         parent::afterFind();
         $this->_oldTags = $this->tags;
     }
 
+    /**
+     * This is invoked after the record is deleted.
+     */
     public function afterDelete()
     {
         parent::afterDelete();

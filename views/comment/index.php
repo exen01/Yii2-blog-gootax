@@ -1,10 +1,7 @@
 <?php
 
-use app\models\Comment;
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\ActionColumn;
-use yii\grid\GridView;
+use yii\widgets\ListView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -21,27 +18,9 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
 
-    <?= GridView::widget([
+    <?= ListView::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'content:ntext',
-            'status',
-            'create_time:datetime',
-            'author',
-            //'email:email',
-            //'url:url',
-            //'post_id',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Comment $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
-        ],
+        'itemView' => '_view',
     ]); ?>
-
 
 </div>

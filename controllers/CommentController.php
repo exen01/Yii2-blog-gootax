@@ -3,10 +3,13 @@
 namespace app\controllers;
 
 use app\models\Comment;
+use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\StaleObjectException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * CommentController implements the CRUD actions for Comment model.
@@ -16,13 +19,13 @@ class CommentController extends Controller
     /**
      * @inheritDoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return array_merge(
             parent::behaviors(),
             [
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -36,20 +39,15 @@ class CommentController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $dataProvider = new ActiveDataProvider([
             'query' => Comment::find(),
-            /*
-            'pagination' => [
-                'pageSize' => 50
-            ],
             'sort' => [
                 'defaultOrder' => [
-                    'id' => SORT_DESC,
+                    'status' => SORT_ASC,
                 ]
             ],
-            */
         ]);
 
         return $this->render('index', [
@@ -63,7 +61,7 @@ class CommentController extends Controller
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView(int $id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -73,9 +71,9 @@ class CommentController extends Controller
     /**
      * Creates a new Comment model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
-    public function actionCreate()
+    public function actionCreate(): Response|string
     {
         $model = new Comment();
 
@@ -96,10 +94,10 @@ class CommentController extends Controller
      * Updates an existing Comment model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id): Response|string
     {
         $model = $this->findModel($id);
 
@@ -116,10 +114,10 @@ class CommentController extends Controller
      * Deletes an existing Comment model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @return Response
+     * @throws NotFoundHttpException|StaleObjectException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id): Response
     {
         $this->findModel($id)->delete();
 
@@ -133,12 +131,28 @@ class CommentController extends Controller
      * @return Comment the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id): Comment
     {
         if (($model = Comment::findOne(['id' => $id])) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * Approves a particular comment.
+     * If approval is successful, the browser will be redirected to the comment index page.
+     * @throws NotFoundHttpException|StaleObjectException
+     */
+    public function actionApprove(int $id)
+    {
+        if (Yii::$app->request->isPost) {
+            $comment = $this->findModel($id);
+            $comment->approve();
+            $this->redirect(array('index'));
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 }
