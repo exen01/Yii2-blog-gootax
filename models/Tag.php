@@ -47,6 +47,34 @@ class Tag extends ActiveRecord
     }
 
     /**
+     * Returns tag names and their corresponding weights.
+     * Only the tags with the top weights will be returned.
+     * @param integer $limit the maximum number of tags that should be returned
+     * @return array weights indexed by tag names.
+     */
+    public static function findTagWeights(int $limit = 20): array
+    {
+        $models = Tag::find()
+            ->limit($limit)
+            ->all();
+
+        $total = 0;
+        foreach ($models as $model) {
+            $total += $model->frequency;
+        }
+
+        $tags = [];
+        if ($total > 0) {
+            foreach ($models as $model) {
+                $tags[$model->name] = 8 + (int)(16 * $model->frequency / ($total + 10));
+            }
+            ksort($tags);
+        }
+
+        return $tags;
+    }
+
+    /**
      * Converts a string of tags into an array.
      *
      * @param $tags string string of tags

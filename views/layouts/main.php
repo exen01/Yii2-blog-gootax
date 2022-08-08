@@ -1,9 +1,13 @@
 <?php
 
 /** @var yii\web\View $this */
+
 /** @var string $content */
 
 use app\assets\AppAsset;
+use app\components\RecentComments;
+use app\components\TagCloud;
+use app\components\UserMenu;
 use app\widgets\Alert;
 use yii\bootstrap4\Breadcrumbs;
 use yii\bootstrap4\Html;
@@ -41,7 +45,7 @@ AppAsset::register($this);
             ['label' => 'About', 'url' => ['/site/about']],
             ['label' => 'Contact', 'url' => ['/site/contact']],
             Yii::$app->user->isGuest ? (
-                ['label' => 'Login', 'url' => ['/site/login']]
+            ['label' => 'Login', 'url' => ['/site/login']]
             ) : (
                 '<li>'
                 . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
@@ -51,20 +55,39 @@ AppAsset::register($this);
                 )
                 . Html::endForm()
                 . '</li>'
-            )
+            ),
         ],
     ]);
-    NavBar::end();
     ?>
 </header>
 
 <main role="main" class="flex-shrink-0">
     <div class="container">
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
-        <?= Alert::widget() ?>
-        <?= $content ?>
+        <div class="row">
+            <div class="list-group col-3" id="sidebar">
+                <div class="list-group-item">
+                    <span>User Menu</span>
+                    <?php if (!Yii::$app->user->isGuest) {
+                        echo UserMenu::widget();
+                    } ?>
+                </div>
+                <div class="list-group-item">
+                    <span>Tags</span>
+                    <?= TagCloud::widget() ?>
+                </div>
+                <div class="list-group-item">
+                    <span>Recent Comments</span>
+                    <?= RecentComments::widget() ?>
+                </div>
+            </div>
+            <div class="col-9">
+                <?= Breadcrumbs::widget([
+                    'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                ]) ?>
+                <?= Alert::widget() ?>
+                <?= $content ?>
+            </div>
+        </div>
     </div>
 </main>
 

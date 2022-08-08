@@ -85,8 +85,10 @@ class Comment extends ActiveRecord
      */
     public function getUrl(Post $post = null): string
     {
-        if ($post === null)
+        if ($post === null) {
             $post = $this->post;
+        }
+
         return $post->getUrl() . '#c' . $this->id;
     }
 
@@ -95,10 +97,34 @@ class Comment extends ActiveRecord
      */
     public function getAuthorLink(): string
     {
-        if (!empty($this->url))
+        if (!empty($this->url)) {
             return Html::a(Html::encode($this->author), $this->url);
-        else
+        } else {
             return Html::encode($this->author);
+        }
+    }
+
+    /**
+     * @return integer the number of comments that are pending approval
+     */
+    public static function getPendingCommentCount(): int
+    {
+        return Comment::find()
+            ->where(['status' => self::STATUS_PENDING])
+            ->count();
+    }
+
+    /**
+     * @param integer $limit the maximum number of comments that should be returned
+     * @return array the most recently added comments
+     */
+    public static function findRecentComments(int $limit = 10): array
+    {
+        return Comment::find()
+            ->where(['status' => self::STATUS_APPROVED])
+            ->limit($limit)
+            ->orderBy(['create_time' => SORT_DESC])
+            ->all();
     }
 
     /**
@@ -112,7 +138,6 @@ class Comment extends ActiveRecord
                 $this->create_time = time();
                 $this->status = Comment::STATUS_PENDING;
             }
-
             return true;
         } else
             return false;
