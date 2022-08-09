@@ -11,5 +11,4 @@ use yii\helpers\Html;
     <li class="list-group-item"><?= Html::a('Управление записями', ['/post/admin']); ?></li>
     <li class="list-group-item"><?= Html::a('Одобрение комментариев', ['/comment/index'])
         . ' (' . Comment::getpendingCommentCount() . ')'; ?></li>
-    <li class="list-group-item"><?= Html::a('Выход', ['/site/logout']); ?></li>
 </ul>

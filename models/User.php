@@ -25,7 +25,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%user}}';
     }
@@ -33,7 +33,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['username', 'password', 'email'], 'required'],
@@ -45,7 +45,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -61,9 +61,9 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getPosts()
+    public function getPosts(): ActiveQuery
     {
-        return $this->hasMany(Post::className(), ['author_id' => 'id']);
+        return $this->hasMany(Post::class, ['author_id' => 'id']);
     }
 
     /**
@@ -72,7 +72,7 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string|int $id the ID to be looked for
      * @return IdentityInterface|null the identity object that matches the given ID.
      */
-    public static function findIdentity($id)
+    public static function findIdentity($id): ?IdentityInterface
     {
         return static::findOne($id);
     }
@@ -83,7 +83,7 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $token the token to be looked for
      * @return IdentityInterface|null the identity object that matches the given token.
      */
-    public static function findIdentityByAccessToken($token, $type = null)
+    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
     {
         return static::findOne(['access_token' => $token]);
     }
@@ -91,7 +91,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @return int|string current user ID
      */
-    public function getId()
+    public function getId(): int|string
     {
         return $this->id;
     }
@@ -99,7 +99,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @return string current user auth key
      */
-    public function getAuthKey()
+    public function getAuthKey(): string
     {
         return $this->auth_key;
     }
@@ -108,7 +108,7 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $authKey
      * @return bool if auth key is valid for current user
      */
-    public function validateAuthKey($authKey)
+    public function validateAuthKey($authKey): bool
     {
         return $this->getAuthKey() === $authKey;
     }
@@ -116,7 +116,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @throws Exception
      */
-    public function beforeSave($insert)
+    public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
@@ -132,7 +132,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @param string $password the password currently being validated.
      */
-    public function validatePassword($password)
+    public function validatePassword(string $password): bool
     {
         $hash = $this->password;
 

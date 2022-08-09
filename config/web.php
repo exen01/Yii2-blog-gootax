@@ -5,6 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'name' => 'My Blog',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -55,6 +56,7 @@ $config = [
         ],
     ],
     'params' => $params,
+    'defaultRoute' => 'post/index',
 ];
 
 if (YII_ENV_DEV) {
@@ -72,6 +74,8 @@ if (YII_ENV_DEV) {
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
+
+    $config['params']['commentNeedApproval'] = true;
 }
 
 return $config;

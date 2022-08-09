@@ -136,7 +136,6 @@ class Comment extends ActiveRecord
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
                 $this->create_time = time();
-                $this->status = Comment::STATUS_PENDING;
             }
             return true;
         } else

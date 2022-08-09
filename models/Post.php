@@ -141,7 +141,7 @@ class Post extends ActiveRecord
      */
     public function addComment(Comment $comment): bool
     {
-        if (isset(Yii::$app->params['commentNeedApproval'])) {
+        if (Yii::$app->params['commentNeedApproval']) {
             $comment->status = Comment::STATUS_PENDING;
         } else {
             $comment->status = Comment::STATUS_APPROVED;
