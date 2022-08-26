@@ -26,7 +26,7 @@ use yii\helpers\Markdown;
             <?= Html::a('Permalink', $model->getUrl(), ['class' => 'list-group-item']); ?>
             <?= Html::a("Comments ({$model->getCommentsCount()})", $model->getUrl() . '#comments', ['class' => 'list-group-item']); ?>
             <div class="list-group-item">
-                Last updated on <?= date('F j, Y', $model->update_time); ?>
+                Last updated on <?= date('h:i A, F j, Y', $model->update_time); ?>
             </div>
         </nav>
     </div>
