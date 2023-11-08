@@ -35,7 +35,7 @@ use vova07\imperavi\Widget;
 
     <?= $form->field($model, 'tags')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->dropDownList([Lookup::items('PostStatus')]) ?>
+    <?= $form->field($model, 'status')->dropDownList(Lookup::items('PostStatus')) ?>
 
     <? //= $form->field($model, 'create_time')->textInput() ?>
 
