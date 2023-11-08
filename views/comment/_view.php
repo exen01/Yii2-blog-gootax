@@ -24,11 +24,17 @@ use yii\helpers\Html;
     <nav class="card-footer">
         <nav class="list-group list-group-horizontal">
             <?= Html::a('Update', ['comment/update', 'id' => $model->id], ['class' => 'list-group-item']); ?>
-            <?= Html::a('Delete', ['comment/delete', 'id' => $model->id], ['class' => 'list-group-item']); ?>
+            <?= Html::a('Delete', ['comment/delete', 'id' => $model->id], [
+                'class' => 'list-group-item',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]); ?>
             <div class="list-group-item">
                 <?= date('F j, Y \a\t h:i a', $model->create_time); ?>
             </div>
-            <?php if ($model->status == Comment::STATUS_PENDING): ?>
+            <?php if ($model->status == Comment::STATUS_PENDING) : ?>
                 <div class="list-group-item">
                     <?= Html::beginForm(['comment/approve', 'id' => $model->id]) ?>
                     <span>Pending approval</span>

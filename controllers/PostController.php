@@ -8,11 +8,10 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\widgets\ActiveForm;
 
 /**
  * PostController implements the CRUD actions for Post model.
@@ -212,8 +211,8 @@ class PostController extends Controller
             $comment->load($this->request->post());
             if ($post->addComment($comment)) {
                 if ($comment->status === Comment::STATUS_PENDING) {
-                    Yii::$app->session->setFlash('commentSubmitted', 'Thank you for your comment.
-                Your comment will be posted once it is approved.');
+                    Yii::$app->session->setFlash('commentSubmitted', "Thank you for your comment.
+                Your comment will be posted once it is approved.", false);
                 }
                 $this->refresh();
             }
@@ -221,6 +220,4 @@ class PostController extends Controller
 
         return $comment;
     }
-
-
 }
